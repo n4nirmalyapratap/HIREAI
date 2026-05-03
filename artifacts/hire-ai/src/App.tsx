@@ -13,27 +13,35 @@ import InterviewSession from "@/pages/InterviewSession";
 import QuestionsBank from "@/pages/QuestionsBank";
 import QuestionDetail from "@/pages/QuestionDetail";
 import CreateQuestion from "@/pages/CreateQuestion";
+import PublicJobBoard from "@/pages/public/PublicJobBoard";
+import PublicJobApply from "@/pages/public/PublicJobApply";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <AppLayout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/jobs" component={JobsList} />
-        <Route path="/jobs/:id" component={JobDetail} />
-        <Route path="/applicants" component={ApplicantsList} />
-        <Route path="/applicants/:id" component={ApplicantProfile} />
-        <Route path="/interviews" component={InterviewsList} />
-        <Route path="/interviews/:id" component={InterviewSession} />
-        <Route path="/questions" component={QuestionsBank} />
-        <Route path="/questions/new" component={CreateQuestion} />
-        <Route path="/questions/:id" component={QuestionDetail} />
-        <Route component={NotFound} />
-      </Switch>
-    </AppLayout>
+    <Switch>
+      <Route path="/apply" component={PublicJobBoard} />
+      <Route path="/apply/:id" component={PublicJobApply} />
+      <Route>
+        <AppLayout>
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/jobs" component={JobsList} />
+            <Route path="/jobs/:id" component={JobDetail} />
+            <Route path="/applicants" component={ApplicantsList} />
+            <Route path="/applicants/:id" component={ApplicantProfile} />
+            <Route path="/interviews" component={InterviewsList} />
+            <Route path="/interviews/:id" component={InterviewSession} />
+            <Route path="/questions" component={QuestionsBank} />
+            <Route path="/questions/new" component={CreateQuestion} />
+            <Route path="/questions/:id" component={QuestionDetail} />
+            <Route component={NotFound} />
+          </Switch>
+        </AppLayout>
+      </Route>
+    </Switch>
   );
 }
 

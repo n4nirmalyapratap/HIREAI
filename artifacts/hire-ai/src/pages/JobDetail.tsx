@@ -5,12 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building, MapPin, Users, Calendar, ArrowUpRight, BrainCircuit } from "lucide-react";
+import { Building, MapPin, Users, Calendar, ArrowUpRight, BrainCircuit, Copy, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export default function JobDetail() {
   const [, params] = useRoute("/jobs/:id");
   const jobId = parseInt(params?.id || "0", 10);
+  const { toast } = useToast();
+
+  const copyApplicationLink = () => {
+    const url = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, "")}/apply/${jobId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      toast({ title: "Link copied!", description: "Share this link with candidates." });
+    });
+  };
 
   const { data: job, isLoading: isLoadingJob } = useGetJob(jobId, { 
     query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId) } 
@@ -50,8 +59,18 @@ export default function JobDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">Edit Job</Button>
-          <Button>View Public Page</Button>
+          <Button variant="outline" onClick={copyApplicationLink}>
+            <Copy className="h-4 w-4 mr-2" /> Copy Apply Link
+          </Button>
+          <a
+            href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/apply/${jobId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button>
+              <ExternalLink className="h-4 w-4 mr-2" /> View Public Page
+            </Button>
+          </a>
         </div>
       </div>
 
