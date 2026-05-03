@@ -359,6 +359,25 @@ paths:
         "204":
           description: Deleted
 
+  /questions/generate:
+    post:
+      operationId: generateQuestions
+      tags: [questions]
+      summary: AI-generate new interview questions, avoiding duplicates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateQuestionsBody"
+      responses:
+        "200":
+          description: Generated questions (not yet saved)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateQuestionsResponse"
+
   /interviews:
     get:
       operationId: listInterviews
@@ -984,3 +1003,72 @@ components:
                 type: integer
             required: [jobId, jobTitle, count]
       required: [stages, byJob]
+
+    GenerateQuestionsBody:
+      type: object
+      properties:
+        count:
+          type: integer
+          default: 3
+          description: "Number of questions to generate"
+        category:
+          type: string
+          enum: [ai_collaboration, technical, behavioral, problem_solving, system_design]
+          nullable: true
+          description: "Force a specific category, or null to let AI choose"
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+          nullable: true
+        jobTitle:
+          type: string
+          nullable: true
+        jobDescription:
+          type: string
+          nullable: true
+        jobRequirements:
+          type: string
+          nullable: true
+        saveToBank:
+          type: boolean
+          default: false
+          description: "If true, save generated questions directly to the question bank"
+      required: [count]
+
+    GeneratedQuestion:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [ai_collaboration, technical, behavioral, problem_solving, system_design]
+        title:
+          type: string
+        prompt:
+          type: string
+        aiContext:
+          type: string
+        evaluationCriteria:
+          type: string
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        timeLimit:
+          type: integer
+        order:
+          type: integer
+        savedId:
+          type: integer
+          nullable: true
+          description: "Set if saveToBank was true and question was saved"
+      required: [category, title, prompt, aiContext, evaluationCriteria, difficulty, timeLimit, order]
+
+    GenerateQuestionsResponse:
+      type: object
+      properties:
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/GeneratedQuestion"
+        savedCount:
+          type: integer
+      required: [questions, savedCount]

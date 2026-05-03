@@ -435,6 +435,65 @@ export const DeleteQuestionParams = zod.object({
 });
 
 /**
+ * @summary AI-generate new interview questions, avoiding duplicates
+ */
+export const generateQuestionsBodyCountDefault = 3;
+export const generateQuestionsBodySaveToBankDefault = false;
+
+export const GenerateQuestionsBody = zod.object({
+  count: zod
+    .number()
+    .default(generateQuestionsBodyCountDefault)
+    .describe("Number of questions to generate"),
+  category: zod
+    .enum([
+      "ai_collaboration",
+      "technical",
+      "behavioral",
+      "problem_solving",
+      "system_design",
+    ])
+    .nullish()
+    .describe("Force a specific category, or null to let AI choose"),
+  difficulty: zod.enum(["easy", "medium", "hard"]).nullish(),
+  jobTitle: zod.string().nullish(),
+  jobDescription: zod.string().nullish(),
+  jobRequirements: zod.string().nullish(),
+  saveToBank: zod
+    .boolean()
+    .default(generateQuestionsBodySaveToBankDefault)
+    .describe(
+      "If true, save generated questions directly to the question bank",
+    ),
+});
+
+export const GenerateQuestionsResponse = zod.object({
+  questions: zod.array(
+    zod.object({
+      category: zod.enum([
+        "ai_collaboration",
+        "technical",
+        "behavioral",
+        "problem_solving",
+        "system_design",
+      ]),
+      title: zod.string(),
+      prompt: zod.string(),
+      aiContext: zod.string(),
+      evaluationCriteria: zod.string(),
+      difficulty: zod.enum(["easy", "medium", "hard"]),
+      timeLimit: zod.number(),
+      order: zod.number(),
+      savedId: zod
+        .number()
+        .nullish()
+        .describe("Set if saveToBank was true and question was saved"),
+    }),
+  ),
+  savedCount: zod.number(),
+});
+
+/**
  * @summary List interview sessions
  */
 export const listInterviewsQueryLimitDefault = 50;

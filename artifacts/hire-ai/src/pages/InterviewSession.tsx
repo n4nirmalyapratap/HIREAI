@@ -25,7 +25,7 @@ export default function InterviewSession() {
   const handleScoreAll = () => {
     setIsScoring(true);
     scoreInterview.mutate(
-      { data: { interviewId: id } },
+      { id },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetInterviewQueryKey(id) });

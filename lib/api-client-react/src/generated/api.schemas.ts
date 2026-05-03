@@ -334,6 +334,82 @@ export interface PipelineStats {
   byJob: PipelineStatsByJobItem[];
 }
 
+/**
+ * Force a specific category, or null to let AI choose
+ */
+export type GenerateQuestionsBodyCategory =
+  | (typeof GenerateQuestionsBodyCategory)[keyof typeof GenerateQuestionsBodyCategory]
+  | null;
+
+export const GenerateQuestionsBodyCategory = {
+  ai_collaboration: "ai_collaboration",
+  technical: "technical",
+  behavioral: "behavioral",
+  problem_solving: "problem_solving",
+  system_design: "system_design",
+} as const;
+
+export type GenerateQuestionsBodyDifficulty =
+  | (typeof GenerateQuestionsBodyDifficulty)[keyof typeof GenerateQuestionsBodyDifficulty]
+  | null;
+
+export const GenerateQuestionsBodyDifficulty = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+} as const;
+
+export interface GenerateQuestionsBody {
+  /** Number of questions to generate */
+  count: number;
+  /** Force a specific category, or null to let AI choose */
+  category?: GenerateQuestionsBodyCategory;
+  difficulty?: GenerateQuestionsBodyDifficulty;
+  jobTitle?: string | null;
+  jobDescription?: string | null;
+  jobRequirements?: string | null;
+  /** If true, save generated questions directly to the question bank */
+  saveToBank?: boolean;
+}
+
+export type GeneratedQuestionCategory =
+  (typeof GeneratedQuestionCategory)[keyof typeof GeneratedQuestionCategory];
+
+export const GeneratedQuestionCategory = {
+  ai_collaboration: "ai_collaboration",
+  technical: "technical",
+  behavioral: "behavioral",
+  problem_solving: "problem_solving",
+  system_design: "system_design",
+} as const;
+
+export type GeneratedQuestionDifficulty =
+  (typeof GeneratedQuestionDifficulty)[keyof typeof GeneratedQuestionDifficulty];
+
+export const GeneratedQuestionDifficulty = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+} as const;
+
+export interface GeneratedQuestion {
+  category: GeneratedQuestionCategory;
+  title: string;
+  prompt: string;
+  aiContext: string;
+  evaluationCriteria: string;
+  difficulty: GeneratedQuestionDifficulty;
+  timeLimit: number;
+  order: number;
+  /** Set if saveToBank was true and question was saved */
+  savedId?: number | null;
+}
+
+export interface GenerateQuestionsResponse {
+  questions: GeneratedQuestion[];
+  savedCount: number;
+}
+
 export type ListJobsParams = {
   status?: ListJobsStatus;
   limit?: number;
