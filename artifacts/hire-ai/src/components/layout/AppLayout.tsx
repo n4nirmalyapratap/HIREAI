@@ -77,7 +77,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <h1 className="ml-4 font-semibold">HireAI</h1>
           </header>
           <main className="flex-1 overflow-y-auto p-4 md:p-8">
-            <div className="max-w-6xl mx-auto h-full">
+            <div className="max-w-6xl mx-auto">
               {children}
             </div>
           </main>

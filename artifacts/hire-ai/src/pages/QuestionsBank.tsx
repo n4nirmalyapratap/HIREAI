@@ -11,16 +11,22 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Plus, BrainCircuit, Clock, Sparkles, CheckCircle2, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Plus, BrainCircuit, Clock, Sparkles, CheckCircle2,
+  Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowRight
+} from "lucide-react";
 import { useState } from "react";
 import type { GeneratedQuestion } from "@workspace/api-client-react";
 
 const NONE = "__none__";
+const PAGE_SIZE = 6;
 
 export default function QuestionsBank() {
   const { data: questions, isLoading } = useListQuestions();
   const queryClient = useQueryClient();
   const generateMutation = useGenerateQuestions();
+
+  const [page, setPage] = useState(1);
 
   const [open, setOpen] = useState(false);
   const [count, setCount] = useState(3);
@@ -32,6 +38,9 @@ export default function QuestionsBank() {
   const [preview, setPreview] = useState<GeneratedQuestion[]>([]);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
+
+  const totalPages = Math.max(1, Math.ceil((questions?.length ?? 0) / PAGE_SIZE));
+  const paginated = questions?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) ?? [];
 
   const getDifficultyColor = (diff: string) => {
     switch (diff) {
@@ -103,7 +112,9 @@ export default function QuestionsBank() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Question Bank</h1>
-          <p className="text-muted-foreground">Manage your library of AI-collaborative interview questions.</p>
+          <p className="text-muted-foreground">
+            {questions ? `${questions.length} question${questions.length !== 1 ? "s" : ""}` : "Loading…"} — click any card to view full details.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => { setPreview([]); setOpen(true); }}>
@@ -119,44 +130,92 @@ export default function QuestionsBank() {
 
       <div className="grid gap-4">
         {isLoading ? (
-          Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-xl" />)
-        ) : questions?.length ? (
-          questions.map((q) => (
-            <Card key={q.id} className={q.category === "ai_collaboration" ? "border-primary/50 bg-primary/5" : ""}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{q.title}</CardTitle>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge variant={q.category === "ai_collaboration" ? "default" : "secondary"} className="capitalize">
-                        {q.category === "ai_collaboration" && <BrainCircuit className="w-3 h-3 mr-1" />}
-                        {q.category.replace("_", " ")}
-                      </Badge>
-                      <Badge variant="outline" className={`capitalize ${getDifficultyColor(q.difficulty)}`}>
-                        {q.difficulty}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {q.timeLimit}m
-                      </span>
+          Array(PAGE_SIZE).fill(0).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-xl" />)
+        ) : paginated.length ? (
+          paginated.map((q) => (
+            <Link key={q.id} href={`/questions/${q.id}`}>
+              <Card
+                className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/40 ${
+                  q.category === "ai_collaboration" ? "border-primary/50 bg-primary/5" : ""
+                }`}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <CardTitle className="text-lg">{q.title}</CardTitle>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <Badge variant={q.category === "ai_collaboration" ? "default" : "secondary"} className="capitalize">
+                          {q.category === "ai_collaboration" && <BrainCircuit className="w-3 h-3 mr-1" />}
+                          {q.category.replace(/_/g, " ")}
+                        </Badge>
+                        <Badge variant="outline" className={`capitalize ${getDifficultyColor(q.difficulty)}`}>
+                          {q.difficulty}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {q.timeLimit}m
+                        </span>
+                      </div>
                     </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground mt-1 shrink-0 ml-3" />
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-foreground line-clamp-2">{q.prompt}</p>
-                <div className="bg-muted/50 p-3 rounded-md border border-dashed border-muted-foreground/30">
-                  <span className="text-xs font-semibold text-primary block mb-1">AI Context / Expected Approach</span>
-                  <p className="text-xs text-muted-foreground">{q.aiContext}</p>
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-foreground line-clamp-2">{q.prompt}</p>
+                  <div className="bg-muted/50 p-3 rounded-md border border-dashed border-muted-foreground/30">
+                    <span className="text-xs font-semibold text-primary block mb-1">AI Context / Expected Approach</span>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{q.aiContext}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))
         ) : (
           <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl border border-dashed">
-            No questions found. Add your first AI-collaborative question.
+            No questions yet. Generate some with AI or add manually.
           </div>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-sm text-muted-foreground">
+            Page {page} of {totalPages} &middot; {questions?.length} questions
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <Button
+                  key={p}
+                  variant={p === page ? "default" : "outline"}
+                  size="sm"
+                  className="w-8 h-8 p-0"
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </Button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -261,16 +320,13 @@ export default function QuestionsBank() {
                   )}
                 </div>
                 {preview.map((q, idx) => (
-                  <div
-                    key={idx}
-                    className="border rounded-lg p-4 space-y-2 bg-background"
-                  >
+                  <div key={idx} className="border rounded-lg p-4 space-y-2 bg-background">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <p className="font-medium text-sm">{q.title}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="secondary" className="capitalize text-xs">
-                            {q.category.replace("_", " ")}
+                            {q.category.replace(/_/g, " ")}
                           </Badge>
                           <Badge variant="outline" className={`capitalize text-xs ${getDifficultyColor(q.difficulty)}`}>
                             {q.difficulty}

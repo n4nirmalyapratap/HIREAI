@@ -11,6 +11,7 @@ import ApplicantProfile from "@/pages/ApplicantProfile";
 import InterviewsList from "@/pages/InterviewsList";
 import InterviewSession from "@/pages/InterviewSession";
 import QuestionsBank from "@/pages/QuestionsBank";
+import QuestionDetail from "@/pages/QuestionDetail";
 import CreateQuestion from "@/pages/CreateQuestion";
 import NotFound from "@/pages/not-found";
 
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/interviews/:id" component={InterviewSession} />
         <Route path="/questions" component={QuestionsBank} />
         <Route path="/questions/new" component={CreateQuestion} />
+        <Route path="/questions/:id" component={QuestionDetail} />
         <Route component={NotFound} />
       </Switch>
     </AppLayout>
